@@ -22,7 +22,8 @@ class MemberController extends Controller
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
                   ->orWhere('nis', 'like', "%{$search}%")
-                  ->orWhere('kelas', 'like', "%{$search}%");
+                  ->orWhere('kelas', 'like', "%{$search}%")
+                  ->orWhere('no_hp', 'like', "%{$search}%");
             });
         }
 
@@ -50,6 +51,7 @@ class MemberController extends Controller
             'nis' => 'required|string|unique:users',
             'kelas' => 'required|string|max:255',
             'alamat' => 'required|string',
+            'no_hp' => 'nullable|string|max:20',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
@@ -90,6 +92,7 @@ class MemberController extends Controller
             'nis' => 'required|string|unique:users,nis,' . $member->id,
             'kelas' => 'required|string|max:255',
             'alamat' => 'required|string',
+            'no_hp' => 'nullable|string|max:20',
             'password' => 'nullable|string|min:8|confirmed',
         ]);
 

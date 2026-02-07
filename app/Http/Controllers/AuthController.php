@@ -23,6 +23,7 @@ class AuthController extends Controller
             'nis' => 'required|string|unique:users',
             'kelas' => 'required|string|max:255',
             'alamat' => 'required|string',
+            'no_hp' => 'nullable|string|max:20',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
@@ -32,6 +33,7 @@ class AuthController extends Controller
             'nis' => $request->nis,
             'kelas' => $request->kelas,
             'alamat' => $request->alamat,
+            'no_hp' => $request->no_hp,
             'password' => Hash::make($request->password),
             'role' => 'siswa',
         ]);

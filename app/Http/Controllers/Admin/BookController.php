@@ -49,6 +49,7 @@ class BookController extends Controller
             'penerbit' => 'required|string|max:255',
             'tahun' => 'required|integer|min:1000|max:' . date('Y'),
             'stok' => 'required|integer|min:0',
+            'kategori' => 'nullable|string|max:100',
             'isbn' => 'nullable|string|unique:books,isbn',
             'deskripsi' => 'nullable|string',
         ]);
@@ -86,6 +87,7 @@ class BookController extends Controller
             'penerbit' => 'required|string|max:255',
             'tahun' => 'required|integer|min:1000|max:' . date('Y'),
             'stok' => 'required|integer|min:0',
+            'kategori' => 'nullable|string|max:100',
             'isbn' => 'nullable|string|unique:books,isbn,' . $book->id,
             'deskripsi' => 'nullable|string',
         ]);

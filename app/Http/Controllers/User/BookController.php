@@ -12,47 +12,48 @@ class BookController extends Controller
     {
         $query = Book::query();
 
-        if ($request->has('search')) {
+        // Satu kolom pencarian (judul, penulis, penerbit, ISBN, kategori)
+        if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('judul', 'like', "%{$search}%")
                   ->orWhere('penulis', 'like', "%{$search}%")
                   ->orWhere('penerbit', 'like', "%{$search}%")
-                  ->orWhere('isbn', 'like', "%{$search}%");
+                  ->orWhere('isbn', 'like', "%{$search}%")
+                  ->orWhere('kategori', 'like', "%{$search}%");
             });
         }
 
-        if ($request->has('penulis')) {
-            $query->where('penulis', 'like', "%{$request->penulis}%");
-        }
-
-        if ($request->has('penerbit')) {
-            $query->where('penerbit', 'like', "%{$request->penerbit}%");
-        }
-
-        if ($request->has('tahun')) {
-            $query->where('tahun', $request->tahun);
+        // Filter kategori (tombol cari sesuai kategori)
+        if ($request->filled('kategori')) {
+            $query->where('kategori', $request->kategori);
         }
 
         $books = $query->latest()->paginate(12);
 
+        // Kategori unik untuk dropdown
+        $kategoris = Book::whereNotNull('kategori')
+            ->where('kategori', '!=', '')
+            ->distinct()
+            ->pluck('kategori')
+            ->sort()
+            ->values();
+
         // Add available stock
         foreach ($books as $book) {
             $borrowed = \App\Models\Transaction::where('book_id', $book->id)
-                ->where('type', 'peminjaman')
-                ->where('status', 'dipinjam')
+                ->whereIn('status', ['dipinjam', 'terlambat'])
                 ->count();
             $book->available_stock = max(0, $book->stok - $borrowed);
         }
 
-        return view('user.books.index', compact('books'));
+        return view('user.books.index', compact('books', 'kategoris'));
     }
 
     public function show(Book $book)
     {
         $borrowed = \App\Models\Transaction::where('book_id', $book->id)
-            ->where('type', 'peminjaman')
-            ->where('status', 'dipinjam')
+            ->whereIn('status', ['dipinjam', 'terlambat'])
             ->count();
         $book->available_stock = max(0, $book->stok - $borrowed);
 

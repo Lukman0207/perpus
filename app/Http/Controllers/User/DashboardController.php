@@ -13,7 +13,7 @@ class DashboardController extends Controller
         $user = Auth::user();
         
         $borrowedBooks = Transaction::where('user_id', $user->id)
-            ->where('status', 'dipinjam')
+            ->whereIn('status', ['dipinjam', 'terlambat'])
             ->with('book')
             ->get();
 
@@ -29,6 +29,23 @@ class DashboardController extends Controller
             ->with('book')
             ->get();
 
-        return view('user.dashboard', compact('borrowedBooks', 'returnedBooks', 'overdueBooks'));
+        // Total denda dari transaksi yang sudah dikembalikan tapi ada denda
+        $transaksiDenganDenda = Transaction::where('user_id', $user->id)
+            ->whereIn('status', ['dikembalikan', 'terlambat'])
+            ->get();
+        $totalDenda = $transaksiDenganDenda->sum(fn ($t) => (float) $t->display_denda);
+
+        // Untuk buku terlambat (belum dikembalikan): estimasi hari terlambat & denda jika dikembalikan hari ini
+        $overdueWithEstimate = $overdueBooks->map(function ($t) {
+            $hariTerlambat = (int) now()->diffInDays($t->tanggal_kembali);
+            $dendaEstimasi = Transaction::hitungDenda($hariTerlambat);
+            return (object) [
+                'transaction' => $t,
+                'hari_terlambat' => $hariTerlambat,
+                'denda_estimasi' => $dendaEstimasi,
+            ];
+        });
+
+        return view('user.dashboard', compact('borrowedBooks', 'returnedBooks', 'overdueBooks', 'totalDenda', 'overdueWithEstimate'));
     }
 }

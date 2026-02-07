@@ -14,6 +14,7 @@ class Book extends Model
         'tahun',
         'stok',
         'deskripsi',
+        'kategori',
         'isbn',
     ];
 
@@ -30,8 +31,7 @@ class Book extends Model
     public function getAvailableStockAttribute(): int
     {
         $borrowed = $this->transactions()
-            ->where('type', 'peminjaman')
-            ->where('status', 'dipinjam')
+            ->whereIn('status', ['dipinjam', 'terlambat'])
             ->count();
         
         return max(0, $this->stok - $borrowed);

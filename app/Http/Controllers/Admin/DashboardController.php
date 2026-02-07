@@ -14,7 +14,7 @@ class DashboardController extends Controller
         $totalBooks = Book::count();
         $totalMembers = User::where('role', 'siswa')->count();
         $totalTransactions = Transaction::count();
-        $borrowedBooks = Transaction::where('status', 'dipinjam')->count();
+        $borrowedBooks = Transaction::whereIn('status', ['dipinjam', 'terlambat'])->count();
         $returnedBooks = Transaction::where('status', 'dikembalikan')->count();
         $overdueBooks = Transaction::where('status', 'terlambat')->count();
 

@@ -25,6 +25,7 @@ class User extends Authenticatable
         'nis',
         'kelas',
         'alamat',
+        'no_hp',
     ];
 
     /**

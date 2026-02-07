@@ -9,3 +9,93 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Animasi background bertema perpustakaan */
+@keyframes bg-float {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); opacity: 0.4; }
+    25% { transform: translate(10px, -15px) rotate(2deg); opacity: 0.5; }
+    50% { transform: translate(-8px, 10px) rotate(-1deg); opacity: 0.45; }
+    75% { transform: translate(5px, 5px) rotate(1deg); opacity: 0.5; }
+}
+
+@keyframes bg-gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+@keyframes bg-float-slow {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-20px) scale(1.02); }
+}
+
+.bg-animate-perpus {
+    position: relative;
+    overflow: hidden;
+}
+
+.bg-animate-perpus::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+        radial-gradient(circle at 20% 80%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(34, 211, 238, 0.06) 0%, transparent 40%);
+    background-size: 200% 200%;
+    animation: bg-gradient-shift 15s ease infinite;
+    pointer-events: none;
+}
+
+.dark .bg-animate-perpus::before {
+    background-image:
+        radial-gradient(circle at 20% 80%, rgba(16, 185, 129, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(34, 211, 238, 0.08) 0%, transparent 40%);
+}
+
+.bg-animate-perpus .float-shape {
+    position: absolute;
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    pointer-events: none;
+}
+
+.bg-animate-perpus .float-shape-1 {
+    width: 280px;
+    height: 280px;
+    background: rgba(16, 185, 129, 0.06);
+    top: 10%;
+    left: 5%;
+    animation: bg-float 20s ease-in-out infinite;
+}
+
+.bg-animate-perpus .float-shape-2 {
+    width: 200px;
+    height: 200px;
+    background: rgba(6, 182, 212, 0.06);
+    bottom: 15%;
+    right: 10%;
+    animation: bg-float 25s ease-in-out infinite reverse;
+}
+
+.bg-animate-perpus .float-shape-3 {
+    width: 150px;
+    height: 150px;
+    background: rgba(34, 211, 238, 0.05);
+    top: 50%;
+    left: 50%;
+    animation: bg-float-slow 18s ease-in-out infinite;
+}
+
+.dark .bg-animate-perpus .float-shape-1 {
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.dark .bg-animate-perpus .float-shape-2 {
+    background: rgba(6, 182, 212, 0.08);
+}
+
+.dark .bg-animate-perpus .float-shape-3 {
+    background: rgba(34, 211, 238, 0.06);
+}

@@ -2,10 +2,10 @@
 
 @section('content')
 <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-500 to-teal-600 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full bg-white rounded-lg shadow-xl p-8">
+    <div class="max-w-md w-full bg-white dark:bg-slate-800 rounded-xl shadow-xl p-8 border border-slate-200 dark:border-slate-700">
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800">Daftar Sebagai Siswa</h1>
-            <p class="text-gray-600 mt-2">Buat akun baru untuk meminjam buku</p>
+            <h1 class="text-3xl font-bold text-slate-800 dark:text-white">Daftar Sebagai Siswa</h1>
+            <p class="text-slate-600 dark:text-slate-400 mt-2">Buat akun baru untuk meminjam buku</p>
         </div>
 
         <form method="POST" action="{{ route('register') }}">
@@ -39,18 +39,27 @@
             </div>
 
             <div class="mb-4">
-                <label for="kelas" class="block text-gray-700 text-sm font-medium mb-2">Kelas</label>
+                <label for="kelas" class="block text-slate-700 dark:text-slate-300 text-sm font-medium mb-2">Kelas</label>
                 <input type="text" id="kelas" name="kelas" value="{{ old('kelas') }}" required placeholder="Contoh: XII IPA 1"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    class="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent">
                 @error('kelas')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
             <div class="mb-4">
-                <label for="alamat" class="block text-gray-700 text-sm font-medium mb-2">Alamat</label>
+                <label for="no_hp" class="block text-slate-700 dark:text-slate-300 text-sm font-medium mb-2">Nomor HP</label>
+                <input type="text" id="no_hp" name="no_hp" value="{{ old('no_hp') }}" placeholder="081234567890"
+                    class="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                @error('no_hp')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="mb-4">
+                <label for="alamat" class="block text-slate-700 dark:text-slate-300 text-sm font-medium mb-2">Alamat</label>
                 <textarea id="alamat" name="alamat" required rows="3"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">{{ old('alamat') }}</textarea>
+                    class="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent">{{ old('alamat') }}</textarea>
                 @error('alamat')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
@@ -77,9 +86,9 @@
         </form>
 
         <div class="mt-6 text-center">
-            <p class="text-sm text-gray-600">
+            <p class="text-sm text-slate-600 dark:text-slate-400">
                 Sudah punya akun?
-                <a href="{{ route('login') }}" class="text-green-600 hover:text-green-700 font-medium">Masuk di sini</a>
+                <a href="{{ route('login') }}" class="text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium">Masuk di sini</a>
             </p>
         </div>
     </div>

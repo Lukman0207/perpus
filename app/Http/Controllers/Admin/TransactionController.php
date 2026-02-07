@@ -65,8 +65,7 @@ class TransactionController extends Controller
 
         $book = Book::findOrFail($validated['book_id']);
         $borrowed = Transaction::where('book_id', $book->id)
-            ->where('type', 'peminjaman')
-            ->where('status', 'dipinjam')
+            ->whereIn('status', ['dipinjam', 'terlambat'])
             ->count();
 
         if ($book->stok - $borrowed <= 0) {
@@ -116,9 +115,24 @@ class TransactionController extends Controller
             'keterangan' => 'nullable|string',
         ]);
 
-        if ($validated['status'] === 'dikembalikan' && !$validated['tanggal_dikembalikan']) {
+        if ($validated['status'] === 'dikembalikan' && !($validated['tanggal_dikembalikan'] ?? null)) {
             $validated['tanggal_dikembalikan'] = now();
         }
+
+        $hariTerlambat = 0;
+        $denda = 0;
+        if (($validated['status'] ?? '') === 'dikembalikan' && !empty($validated['tanggal_dikembalikan'])) {
+            $tanggalDikembalikan = \Carbon\Carbon::parse($validated['tanggal_dikembalikan']);
+            $tanggalKembali = !empty($validated['tanggal_kembali'])
+                ? \Carbon\Carbon::parse($validated['tanggal_kembali'])
+                : $transaction->tanggal_kembali;
+            if ($tanggalKembali && $tanggalDikembalikan->gt($tanggalKembali)) {
+                $hariTerlambat = (int) $tanggalDikembalikan->diffInDays($tanggalKembali);
+                $denda = Transaction::hitungDenda($hariTerlambat);
+            }
+        }
+        $validated['hari_terlambat'] = $hariTerlambat;
+        $validated['denda'] = $denda;
 
         $transaction->update($validated);
 

@@ -10,12 +10,22 @@ use Illuminate\Support\Facades\Auth;
 
 class TransactionController extends Controller
 {
+    private const MAKSIMAL_PINJAM_AKTIF = 5;
+
     public function borrow(Request $request, Book $book)
     {
+        // Batas 5 buku aktif (belum dikembalikan)
+        $jumlahAktif = Transaction::where('user_id', Auth::id())
+            ->whereIn('status', ['dipinjam', 'terlambat'])
+            ->count();
+
+        if ($jumlahAktif >= self::MAKSIMAL_PINJAM_AKTIF) {
+            return back()->withErrors(['error' => 'Anda telah mencapai batas maksimal 5 buku yang belum dikembalikan. Kembalikan buku terlebih dahulu untuk meminjam yang baru.']);
+        }
+
         // Validasi stok
         $borrowed = Transaction::where('book_id', $book->id)
-            ->where('type', 'peminjaman')
-            ->where('status', 'dipinjam')
+            ->whereIn('status', ['dipinjam', 'terlambat'])
             ->count();
 
         if ($book->stok - $borrowed <= 0) {
@@ -25,8 +35,7 @@ class TransactionController extends Controller
         // Cek apakah user sudah meminjam buku yang sama dan belum dikembalikan
         $alreadyBorrowed = Transaction::where('user_id', Auth::id())
             ->where('book_id', $book->id)
-            ->where('type', 'peminjaman')
-            ->where('status', 'dipinjam')
+            ->whereIn('status', ['dipinjam', 'terlambat'])
             ->exists();
 
         if ($alreadyBorrowed) {
@@ -39,7 +48,7 @@ class TransactionController extends Controller
             'book_id' => $book->id,
             'type' => 'peminjaman',
             'tanggal_pinjam' => now(),
-            'tanggal_kembali' => now()->addDays(7), // Pinjam selama 7 hari
+            'tanggal_kembali' => now()->addDays(7),
             'status' => 'dipinjam',
             'keterangan' => $request->keterangan,
         ]);
@@ -56,24 +65,34 @@ class TransactionController extends Controller
         }
 
         // Pastikan status masih dipinjam
-        if ($transaction->status !== 'dipinjam') {
+        if (!in_array($transaction->status, ['dipinjam', 'terlambat'])) {
             return back()->withErrors(['error' => 'Buku ini sudah dikembalikan.']);
         }
 
-        // Update status menjadi dikembalikan
+        $tanggalDikembalikan = now();
+        $hariTerlambat = 0;
+        $denda = 0;
+
+        if ($transaction->tanggal_kembali && $tanggalDikembalikan->gt($transaction->tanggal_kembali)) {
+            $hariTerlambat = $tanggalDikembalikan->diffInDays($transaction->tanggal_kembali);
+            $denda = Transaction::hitungDenda($hariTerlambat);
+        }
+
         $transaction->update([
             'status' => 'dikembalikan',
-            'tanggal_dikembalikan' => now(),
+            'tanggal_dikembalikan' => $tanggalDikembalikan,
             'type' => 'pengembalian',
+            'hari_terlambat' => $hariTerlambat,
+            'denda' => $denda,
         ]);
 
-        // Cek apakah terlambat
-        if ($transaction->tanggal_kembali < now()) {
-            $transaction->update(['status' => 'terlambat']);
+        $message = 'Buku berhasil dikembalikan.';
+        if ($denda > 0) {
+            $message .= ' Denda terlambat ' . $hariTerlambat . ' hari: Rp ' . number_format($denda, 0, ',', '.');
         }
 
         return redirect()->route('user.dashboard')
-            ->with('success', 'Buku berhasil dikembalikan.');
+            ->with('success', $message);
     }
 
     public function myTransactions()
